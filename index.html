@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0D1B3E">
+<title>ZenAiOS — Doctor Module v7 (Enhanced)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563EB;--blue-d:#1D4ED8;--blue-l:#DBEAFE;--blue-ll:#EFF6FF;
+  --accent:#06B6D4;
+  --ink:#0F172A;--ink2:#334155;--ink3:#64748B;--ink4:#94A3B8;
+  --bg:#F8FAFC;--surf:#FFFFFF;--surf2:#F1F5F9;--surf3:#E2E8F0;
+  --border:rgba(37,99,235,0.12);--border2:rgba(37,99,235,0.20);
+  --shadow:0 1px 3px rgba(15,23,42,0.08);--shadow-md:0 4px 6px rgba(15,23,42,0.10);--shadow-lg:0 10px 25px rgba(15,23,42,0.15);
+  --r:16px;--r-sm:12px;--r-xs:8px;--nav-w:260px;
+  --green:#10B981;--green-l:#D1FAE5;
+  --red:#EF4444;--red-l:#FEE2E2;
+  --yellow:#F59E0B;--yellow-l:#FEF3C7;
+  --font:'Inter',sans-serif;
+}
+html,body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+.app{display:flex;min-height:100vh}
+button,input,textarea,select{font-family:var(--font)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(37,99,235,0.25);border-radius:6px}
+
+/* GLASSMORPHISM EFFECTS */
+.glass{background:rgba(255,255,255,0.7);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.5)}
+.glass-dark{background:rgba(15,23,42,0.8);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.1)}
+.card-hover{transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+.card-hover:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(15,23,42,0.15)}
+
+/* ═══ NAV ═══ */
+.nav{width:var(--nav-w);background:linear-gradient(180deg,var(--ink) 0%,#1e293b 100%);display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;z-index:100;transition:transform 0.3s ease}
+.nav-head{padding:20px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-img{width:40px;height:40px;object-fit:cover;flex-shrink:0;border-radius:12px;border:2px solid var(--blue);box-shadow:0 0 0 4px rgba(37,99,235,0.2),0 8px 20px rgba(37,99,235,0.3)}
+.logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#fff;letter-spacing:-0.5px}
+.logo-name em{color:var(--accent);font-style:normal}
+
+.doc-pill{margin:16px;border-radius:var(--r-sm);flex-shrink:0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}
+.doc-pill-top{display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;border-radius:var(--r-sm);transition:all 0.2s}
+.doc-pill-top:hover{background:rgba(255,255,255,0.08)}
+.doc-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,0.4)}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-spec{font-size:11px;color:rgba(255,255,255,0.5)}
+.spec-badge{font-size:9px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff;padding:2px 8px;border-radius:4px;margin-top:4px;display:inline-block;text-transform:uppercase;letter-spacing:0.5px}
+
+.admin-panel{max-height:0;overflow:hidden;transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1);background:rgba(0,0,0,0.2);margin:0 16px 16px;border-radius:0 0 var(--r-sm) var(--r-sm)}
+.admin-panel.open{max-height:600px}
+.admin-inner{padding:16px;border-top:1px solid rgba(255,255,255,0.06)}
+.adm-sec{font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;padding:12px 0 8px}
+.adm-field{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:6px;font-size:12px;color:rgba(255,255,255,0.6)}
+.adm-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:6px;cursor:pointer;color:rgba(255,255,255,0.6);font-size:12px;font-weight:500;transition:all 0.15s;border:none;width:100%;text-align:left}
+.adm-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
+.adm-lang-opts{display:flex;gap:6px;margin-top:8px}
+.adm-lang-btn{padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:transparent;font-size:11px;font-weight:600;cursor:pointer;color:rgba(255,255,255,0.5);transition:all 0.15s}
+.adm-lang-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.adm-textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px;font-size:12px;color:rgba(255,255,255,0.8);resize:none;outline:none;height:60px;margin:8px 0 8px;transition:border-color 0.2s}
+.adm-send{width:100%;background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.adm-send:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,99,235,0.4)}
+
+.nav-section{padding:16px 20px 8px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1.5px;flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--r-sm);margin:2px 12px;cursor:pointer;color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;transition:all 0.2s}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.9)}
+.nav-item.active{background:linear-gradient(90deg,rgba(37,99,235,0.8),rgba(6,182,212,0.6));color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(37,99,235,0.3)}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:700;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);padding:2px 8px;border-radius:10px}
+.nav-item.active .nav-badge{background:rgba(255,255,255,0.25);color:#fff}
+.nav-badge-red{background:rgba(239,68,68,0.3);color:#fca5a5}
+
+.nav-hist-wrap{flex:1;overflow-y:auto;padding:0 12px 16px}
+.hist-item{margin:2px 0;border-radius:var(--r-sm);transition:all 0.2s}
+.hist-item:hover{background:rgba(255,255,255,0.05)}
+.hi-main{padding:10px 12px;cursor:pointer}
+.hi-t{color:rgba(255,255,255,0.7);font-size:12px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi-d{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px}
+
+/* ═══ MOBILE NAV TOGGLE ═══ */
+.mobile-nav-toggle{display:none;position:fixed;top:16px;left:16px;z-index:200;width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--accent));border:none;color:#fff;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 15px rgba(37,99,235,0.4)}
+.mobile-nav-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90;backdrop-filter:blur(4px)}
+
+/* ═══ MAIN ═══ */
+.main{flex:1;margin-left:var(--nav-w);display:flex;flex-direction:column;min-height:100vh;transition:margin-left 0.3s}
+
+/* TOPBAR */
+.topbar{background:var(--surf);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
+.tb-left{display:flex;align-items:center;gap:12px}
+.zena-av{width:44px;height:44px;border-radius:50%;border:2px solid var(--blue);overflow:hidden;flex-shrink:0;box-shadow:0 0 0 4px rgba(37,99,235,0.1),0 8px 20px rgba(37,99,235,0.2)}
+.zena-av img{width:100%;height:100%;object-fit:cover}
+.tb-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--ink);letter-spacing:-0.3px}
+.tb-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--green-l),#dcfce7);color:#15803d;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:4px;border:1px solid rgba(16,185,129,0.2)}
+.pulse{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.tb-right{display:flex;align-items:center;gap:10px}
+
+.resp-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);border:1.5px solid var(--border2);background:var(--surf2);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--ink2)}
+.resp-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.resp-btn.elaborat{background:linear-gradient(135deg,var(--blue),var(--accent));border-color:transparent;color:#fff}
+.icon-btn{width:40px;height:40px;border-radius:var(--r-sm);border:1.5px solid var(--border2);background:var(--surf2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink3);transition:all 0.2s}
+.icon-btn:hover{background:var(--blue-l);color:var(--blue);border-color:var(--blue);transform:translateY(-2px)}
+
+/* ═══ VIEWS ═══ */
+.view{display:none;flex:1;flex-direction:column;min-height:calc(100vh - 64px);padding:24px;overflow-y:auto}
+.view.active{display:flex}
+
+/* HERO SECTION */
+.hero-section{background:linear-gradient(135deg,var(--ink) 0%,#1e293b 50%,var(--blue-d) 100%);border-radius:var(--r);padding:40px;margin-bottom:24px;color:#fff;position:relative;overflow:hidden}
+.hero-section::before{content:'';position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"none\" stroke=\"rgba(255,255,255,0.05)\" stroke-width=\"0.5\"/></svg>');opacity:0.5}
+.hero-content{position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:6px 14px;font-size:12px;margin-bottom:16px;backdrop-filter:blur(10px)}
+.hero-title{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;margin-bottom:12px;line-height:1.2}
+.hero-desc{font-size:14px;color:rgba(255,255,255,0.7);max-width:500px;margin-bottom:24px}
+.hero-stats{display:flex;gap:32px}
+.hero-stat{text-align:center}
+.hero-stat-val{font-size:28px;font-weight:800;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px}
+
+/* QUICK ACTIONS */
+.quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.qa-card{background:var(--surf);border-radius:var(--r-sm);padding:20px;border:1px solid var(--border);transition:all 0.3s;cursor:pointer}
+.qa-card:hover{border-color:var(--blue);transform:translateY(-4px);box-shadow:0 12px 30px rgba(37,99,235,0.15)}
+.qa-icon{width:48px;height:48px;border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px}
+.qa-icon.blue{background:var(--blue-l);color:var(--blue)}
+.qa-icon.green{background:var(--green-l);color:var(--green)}
+.qa-icon.yellow{background:var(--yellow-l);color:#b45309}
+.qa-icon.red{background:var(--red-l);color:var(--red)}
+.qa-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.qa-desc{font-size:12px;color:var(--ink3)}
+
+/* SCOPE BAR */
+.scope-bar{background:var(--surf);border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:24px;border:1px solid var(--border)}
+.scope-lbl{font-size:12px;font-weight:600;color:var(--ink3);white-space:nowrap}
+.stag{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid;cursor:pointer;transition:all 0.2s}
+.stag.on{background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(37,99,235,0.3)}
+.stag.off{background:transparent;color:var(--ink3);border-color:var(--border2)}
+.stag.off:hover{border-color:var(--blue);color:var(--blue)}
+.sd{width:6px;height:6px;border-radius:50%;background:currentColor}
+.scope-count{margin-left:auto;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-l);padding:4px 12px;border-radius:20px}
+
+/* CHAT */
+.chat-container{background:var(--surf);border-radius:var(--r);border:1px solid var(--border);display:flex;flex-direction:column;flex:1;overflow:hidden}
+.chat-area{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+.date-div{display:flex;align-items:center;gap:12px;color:var(--ink4);font-size:12px;font-weight:500;margin:8px 0}
+.date-div::before,.date-div::after{content:'';flex:1;height:1px;background:var(--border2)}
+.msg-row{display:flex;gap:12px;align-items:flex-start;animation:fadeUp 0.3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg-row.user{flex-direction:row-reverse}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.av.ai{background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff}
+.av.user{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.msg-body{max-width:70%;display:flex;flex-direction:column;gap:6px}
+.msg-row.user .msg-body{align-items:flex-end}
+.bubble{padding:14px 18px;border-radius:var(--r-sm);font-size:14px;line-height:1.6;box-shadow:var(--shadow)}
+.ai .bubble{background:var(--surf2);border:1px solid var(--border);border-top-left-radius:4px}
+.user .bubble{background:linear-gradient(135deg,var(--blue),#3b82f6);color:#fff;border-top-right-radius:4px}
+.msg-time{font-size:11px;color:var(--ink4);padding:0 4px}
+.hl{color:var(--blue);font-weight:600}
+.mtag{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;margin:2px}
+.mtag.blue{background:var(--blue-l);color:var(--blue-d)}
+.mtag.red{background:var(--red-l);color:#b91c1c}
+.mtag.green{background:var(--green-l);color:#15803d}
+
+.suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.sugg{background:var(--surf);border:1.5px solid var(--border2);color:var(--blue);font-size:12px;font-weight:600;padding:8px 16px;border-radius:20px;cursor:pointer;transition:all 0.2s}
+.sugg:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* INPUT AREA */
+.input-zone{padding:16px 24px;background:var(--surf2);border-top:1px solid var(--border)}
+.input-wrap{display:flex;align-items:flex-end;gap:10px;background:var(--surf);border:2px solid var(--border2);border-radius:var(--r);padding:10px 12px 10px 18px;transition:all 0.2s}
+.input-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-l)}
+.input-wrap textarea{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:var(--ink);resize:none;line-height:1.5;max-height:120px;min-height:24px}
+.inp-acts{display:flex;gap:8px;align-items:center}
+.inp-btn{width:36px;height:36px;border-radius:var(--r-xs);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink3);background:var(--surf2);transition:all 0.2s}
+.inp-btn:hover{background:var(--blue-l);color:var(--blue);transform:scale(1.05)}
+.send-btn{width:40px;height:40px;border-radius:var(--r-xs);border:none;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,0.3)}
+.send-btn:hover{transform:scale(1.05);box-shadow:0 6px 20px rgba(37,99,235,0.4)}
+.inp-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.inp-hint{font-size:11px;color:var(--ink4)}
+.rag-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-l);padding:4px 12px;border-radius:16px}
+.rpd{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:pulse 2s infinite}
+
+/* PATIENT CARDS */
+.pat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.pat-card{background:var(--surf);border-radius:var(--r-sm);padding:20px;border:1px solid var(--border);transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden}
+.pat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--border)}
+.pat-card.urgent::before{background:var(--red)}
+.pat-card.stable::before{background:var(--green)}
+.pat-card:hover{border-color:var(--blue);transform:translateY(-4px);box-shadow:0 16px 40px rgba(15,23,42,0.12)}
+.pat-header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.pat-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0}
+.pat-av.urgent{background:linear-gradient(135deg,var(--red),#f87171)}
+.pat-av.stable{background:linear-gradient(135deg,var(--green),#34d399)}
+.pat-av.normal{background:linear-gradient(135deg,var(--blue),#60a5fa)}
+.pat-name{font-size:15px;font-weight:700;color:var(--ink)}
+.pat-meta{font-size:12px;color:var(--ink3);margin-top:2px}
+.pat-dx{font-size:13px;color:var(--ink2);margin-top:8px;font-weight:500}
+.pat-status{position:absolute;top:20px;right:20px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:12px;text-transform:uppercase}
+.pat-status.urgent{background:var(--red-l);color:var(--red)}
+.pat-status.stable{background:var(--green-l);color:#15803d}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surf);border-radius:var(--r-sm);padding:24px;border:1px solid var(--border);text-align:center;transition:all 0.3s}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(15,23,42,0.1);border-color:var(--blue)}
+.stat-val{font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-lbl{font-size:12px;color:var(--ink3);margin-top:8px;font-weight:500}
+
+/* CALC MODAL */
+.calc-modal{position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(8px)}
+.calc-modal.open{opacity:1;pointer-events:all}
+.calc-box{background:var(--surf);border-radius:var(--r);box-shadow:0 25px 60px rgba(15,23,42,0.25);width:400px;max-height:85vh;overflow:auto;animation:popIn 0.3s ease}
+@keyframes popIn{from{transform:scale(0.9) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.calc-box-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surf);z-index:10}
+.calc-box-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px}
+.close-btn{width:36px;height:36px;border-radius:var(--r-xs);border:none;background:var(--surf2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all 0.2s}
+.close-btn:hover{background:var(--red-l);color:var(--red)}
+.calc-body{padding:24px}
+.calc-field{margin-bottom:16px}
+.calc-field label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.calc-field input,.calc-field select{width:100%;background:var(--surf2);border:2px solid var(--border2);border-radius:var(--r-xs);padding:10px 14px;font-size:14px;color:var(--ink);outline:none;transition:all 0.2s}
+.calc-field input:focus,.calc-field select:focus{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-l)}
+.calc-result{background:linear-gradient(135deg,var(--blue-l),rgba(6,182,212,0.1));border:2px solid var(--blue);border-radius:var(--r-sm);padding:20px;margin-top:16px;text-align:center}
+.cr-val{font-family:'Syne',sans-serif;font-weight:800;font-size:36px;background:linear-gradient(135deg,var(--blue),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cr-lbl{font-size:13px;color:var(--ink3);margin-top:4px}
+.calc-run{width:100%;background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff;border:none;border-radius:var(--r-xs);padding:14px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;transition:all 0.2s;box-shadow:0 4px 15px rgba(37,99,235,0.3)}
+.calc-run:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(37,99,235,0.4)}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:1024px){
+  .nav{transform:translateX(-100%)}
+  .nav.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .mobile-nav-toggle{display:flex}
+  .mobile-nav-overlay{display:block;opacity:0;pointer-events:none;transition:opacity 0.3s}
+  .mobile-nav-overlay.open{opacity:1;pointer-events:all}
+}
+
+@media(max-width:768px){
+  .view{padding:16px}
+  .hero-section{padding:24px;margin-bottom:16px}
+  .hero-title{font-size:24px}
+  .hero-stats{gap:20px}
+  .hero-stat-val{font-size:20px}
+  .quick-actions{grid-template-columns:1fr}
+  .pat-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .scope-bar{flex-wrap:wrap;padding:10px 12px}
+  .topbar{padding:0 16px;height:56px}
+  .tb-title{font-size:14px}
+  .msg-body{max-width:85%}
+  .input-zone{padding:12px 16px}
+}
+
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .calc-box{width:calc(100vw - 32px);margin:0 16px}
+  .hero-stats{flex-wrap:wrap;gap:16px}
+  .suggestions{gap:6px}
+  .sugg{font-size:11px;padding:6px 12px}
+}
+
+/* ANIMATIONS */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.fade-in{animation:fadeUp 0.5s ease}
+.slide-in{animation:slideIn 0.4s ease}
+
+/* SCROLL INDICATOR */
+.scroll-indicator{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;box-shadow:0 4px 20px rgba(37,99,235,0.4);z-index:100;transition:all 0.3s}
+.scroll-indicator:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(37,99,235,0.5)}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<!-- Mobile Nav Toggle -->
+<button class="mobile-nav-toggle" id="mobileNavToggle" onclick="toggleMobileNav()">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="mobile-nav-overlay" id="navOverlay" onclick="toggleMobileNav()"></div>
+
+<div class="app">
+<!-- ═══ NAV ═══ -->
+<nav class="nav" id="mainNav">
+  <div class="nav-head">
+    <div class="logo">
+      <div class="logo-img">🩺</div>
+      <div class="logo-name">Zen<em>Ai</em>OS</div>
+    </div>
+  </div>
+
+  <div class="doc-pill" id="docPill">
+    <div class="doc-pill-top" onclick="toggleAdmin(event)">
+      <div class="doc-av">CA</div>
+      <div class="doc-info">
+        <div class="doc-name">Dr. Constantin Aurel</div>
+        <div class="doc-spec">Medic Primar</div>
+        <div class="spec-badge">❤️ CARDIOLOGIE</div>
+      </div>
+    </div>
+    <div class="admin-panel" id="adminPanel" onclick="event.stopPropagation()">
+      <div class="admin-inner">
+        <div class="adm-sec">Cont</div>
+        <div class="adm-field">📧 contact@zenaios.ro</div>
+        <div class="adm-field">📱 +40 721 000 000</div>
+        <div class="adm-sec">Setări</div>
+        <button class="adm-btn" onclick="alert('Schimbare parolă')">🔐 Schimbă parola</button>
+        <button class="adm-btn" onclick="alert('Recuperare parolă')">🔑 Recuperare parolă</button>
+        <div class="adm-sec">Limbă</div>
+        <div class="adm-lang-opts">
+          <button class="adm-lang-btn active">🇷🇴 RO</button>
+          <button class="adm-lang-btn">🇬🇧 EN</button>
+          <button class="adm-lang-btn">🇭🇺 HU</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-section">Modul Medic</div>
+  <div class="nav-item active" id="nav-home" onclick="showView('home',this)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item" id="nav-patients" onclick="showView('patients',this)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Pacienți<span class="nav-badge">20</span>
+  </div>
+  <div class="nav-item" id="nav-chat" onclick="showView('chat',this)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    AI Assistant
+  </div>
+  <div class="nav-item" id="nav-calc" onclick="openCalculator()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+    Calculatoare
+  </div>
+  <div class="nav-item" id="nav-notif" onclick="showView('notif',this)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    Notificări<span class="nav-badge nav-badge-red">5</span>
+  </div>
+  <div class="nav-item" id="nav-stats" onclick="showView('stats',this)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Statistici
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="zena-av">🤖</div>
+      <div>
+        <div class="tb-title">AI Zena Assistant</div>
+        <div class="tb-badge"><div class="pulse"></div>Online · Activ</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <button class="resp-btn" id="respBtn" onclick="toggleRespMode()">⚡ Răspuns Scurt</button>
+      <button class="icon-btn" title="Calculatoare" onclick="openCalculator()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></button>
+    </div>
+  </div>
+
+  <!-- HOME VIEW -->
+  <div class="view active" id="view-home">
+    <div class="hero-section">
+      <div class="hero-content">
+        <div class="hero-badge">🩺 Modul Cardiologie Activ</div>
+        <h1 class="hero-title">Bună ziua,<br>Dr. Constantin Aurel</h1>
+        <p class="hero-desc">Asistentul AI Zena este pregătit să vă ajute cu ghiduri clinice, protocoale și calcule medicale.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hero-stat-val">247</div><div class="hero-stat-lbl">Pacienți lună</div></div>
+          <div class="hero-stat"><div class="hero-stat-val">18</div><div class="hero-stat-lbl">Internați azi</div></div>
+          <div class="hero-stat"><div class="hero-stat-val">94%</div><div class="hero-stat-lbl">Ocupare</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <div class="qa-card" onclick="quickAction('STEMI')">
+        <div class="qa-icon blue">🚨</div>
+        <div class="qa-title">Protocol STEMI</div>
+        <div class="qa-desc">Ghid de urgență infarct miocardic</div>
+      </div>
+      <div class="qa-card" onclick="quickAction('FA')">
+        <div class="qa-icon yellow">⚡</div>
+        <div class="qa-title">Fibrilație Atrială</div>
+        <div class="qa-desc">Anticoagulare și management</div>
+      </div>
+      <div class="qa-card" onclick="quickAction('IC')">
+        <div class="qa-icon red">❤️</div>
+        <div class="qa-title">Insuficiență Cardiacă</div>
+        <div class="qa-desc">Tratament HFrEF și HFpEF</div>
+      </div>
+      <div class="qa-card" onclick="quickAction('Calc')">
+        <div class="qa-icon green">📊</div>
+        <div class="qa-title">Scoruri Risc</div>
+        <div class="qa-desc">GRACE, CHA₂DS₂-VASc, HAS-BLED</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val">38</div><div class="stat-lbl">Consultații azi</div></div>
+      <div class="stat-card"><div class="stat-val">4.2</div><div class="stat-lbl">Zile medie internare</div></div>
+      <div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">Externări săptămână</div></div>
+      <div class="stat-card"><div class="stat-val">5</div><div class="stat-lbl">Urgențe active</div></div>
+    </div>
+  </div>
+
+  <!-- CHAT VIEW -->
+  <div class="view" id="view-chat">
+    <div class="scope-bar">
+      <span class="scope-lbl">🔍 Sursă:</span>
+      <div class="stag on"><div class="sd"></div>Toate Sursele</div>
+      <div class="stag off"><div class="sd"></div>Ghiduri ESC</div>
+      <div class="stag off"><div class="sd"></div>Protocoale</div>
+      <div class="scope-count">11 surse active</div>
+    </div>
+    <div class="chat-container">
+      <div class="chat-area">
+        <div class="date-div">Astăzi, 20 Feb 2026</div>
+        <div class="msg-row ai">
+          <div class="av ai">Z</div>
+          <div class="msg-body">
+            <div class="bubble">Bună ziua, <span class="hl">Dr. Constantin Aurel</span>! 👋<br><br>Sunt <strong>Zena</strong>, asistentul AI ZenAiOS pentru <strong>Cardiologie</strong>. Răspunsurile mele sunt ancorate în ghiduri, protocoale și documentele secției din Biblioteca RAG.<br><br>Cu ce vă pot ajuta astăzi?</div>
+            <div class="suggestions">
+              <div class="sugg" onclick="insertMessage('Protocol STEMI anterior')">🚨 Protocol STEMI</div>
+              <div class="sugg" onclick="insertMessage('Tratament IC HFrEF')">💊 IC HFrEF</div>
+              <div class="sugg" onclick="insertMessage('Anticoagulare FA')">⚡ FA + AC</div>
+            </div>
+            <div class="msg-time">09:00</div>
+          </div>
+        </div>
+        <div class="msg-row user">
+          <div class="av user">CA</div>
+          <div class="msg-body">
+            <div class="bubble">Pacient 67 ani, ST elevat V1-V4, Troponina HS 890 ng/L. Protocol STEMI?</div>
+            <div class="msg-time">09:16</div>
+          </div>
+        </div>
+        <div class="msg-row ai">
+          <div class="av ai">Z</div>
+          <div class="msg-body">
+            <div class="bubble"><strong>🚨 STEMI anterior confirmat</strong> — <span class="mtag red">Urgență maximă</span><br><br><strong>Activare:</strong> Cod STEMI · Țintă <span class="hl">Door-to-balloon ≤ 90 min</span><br><br><strong>Antitrombotice:</strong> <span class="mtag blue">Aspirină 300mg</span> + <span class="mtag blue">Ticagrelor 180mg</span> + <span class="mtag blue">Heparină UFH 70 UI/kg IV</span><br><br><strong>PCI primar</strong> preferat ≤120 min. Abord radial recomandat.</div>
+            <div class="msg-time">09:17</div>
+          </div>
+        </div>
+      </div>
+      <div class="input-zone">
+        <div class="input-wrap">
+          <textarea id="msgInput" rows="1" placeholder="Descrie cazul sau pune o întrebare..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+          <div class="inp-acts">
+            <button class="inp-btn" title="Atașare fișier">📎</button>
+            <button class="inp-btn" title="Dictare vocală">🎤</button>
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+          </div>
+        </div>
+        <div class="inp-footer">
+          <div class="inp-hint">Enter trimite · <b>Shift+Enter</b> linie nouă</div>
+          <div class="rag-pill"><div class="rpd"></div>RAG: Toate sursele Cardiologie</div>
+          <div class="inp-hint" style="color:var(--red);font-weight:600">⚠️ Verifică clinic</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATIENTS VIEW -->
+  <div class="view" id="view-patients">
+    <div class="scope-bar">
+      <span class="scope-lbl">👥 Filtru:</span>
+      <div class="stag on"><div class="sd"></div>Toți pacienții</div>
+      <div class="stag off"><div class="sd"></div>Internați</div>
+      <div class="stag off"><div class="sd"></div>Externați</div>
+      <div class="stag off"><div class="sd"></div>Urgențe</div>
+      <div class="scope-count">20 pacienți</div>
+    </div>
+    <div class="pat-grid">
+      <div class="pat-card urgent">
+        <div class="pat-status urgent">Urgență</div>
+        <div class="pat-header">
+          <div class="pat-av urgent">IM</div>
+          <div>
+            <div class="pat-name">Ionescu Marin</div>
+            <div class="pat-meta">67 ani • Camera 204 • Internat</div>
+          </div>
+        </div>
+        <div class="pat-dx">STEMI anterior • Hiperkaliemie K+ 6.2</div>
+      </div>
+      <div class="pat-card stable">
+        <div class="pat-status stable">Stabil</div>
+        <div class="pat-header">
+          <div class="pat-av stable">PD</div>
+          <div>
+            <div class="pat-name">Popescu Daniela</div>
+            <div class="pat-meta">45 ani • Ambulatoriu</div>
+          </div>
+        </div>
+        <div class="pat-dx">Control periodic HTA • EKG normal</div>
+      </div>
+      <div class="pat-card">
+        <div class="pat-header">
+          <div class="pat-av normal">GS</div>
+          <div>
+            <div class="pat-name">Georgescu Sorin</div>
+            <div class="pat-meta">52 ani • Camera 156</div>
+          </div>
+        </div>
+        <div class="pat-dx">Post-operator colecistectomie • Monitorizare</div>
+      </div>
+      <div class="pat-card">
+        <div class="pat-header">
+          <div class="pat-av normal">RC</div>
+          <div>
+            <div class="pat-name">Radu Cristina</div>
+            <div class="pat-meta">38 ani • Ambulatoriu</div>
+          </div>
+        </div>
+        <div class="pat-dx">Control tiroidă • Programată 14:30</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS VIEW -->
+  <div class="view" id="view-notif">
+    <div class="scope-bar">
+      <span class="scope-lbl">🔔 Categorie:</span>
+      <div class="stag on"><div class="sd"></div>Toate</div>
+      <div class="stag off" style="color:var(--red);border-color:var(--red)"><div class="sd"></div>Critice</div>
+      <div class="stag off" style="color:var(--yellow);border-color:var(--yellow)"><div class="sd"></div>Avertizări</div>
+      <div class="scope-count">5 notificări noi</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--surf);border-radius:var(--r-sm);padding:16px 20px;border-left:4px solid var(--red);box-shadow:var(--shadow);display:flex;align-items:center;gap:16px">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--red);animation:pulse 2s infinite;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px">Rezultate critice analize</div>
+          <div style="font-size:12px;color:var(--ink2)">Pacient Ionescu Marin - K+ 6.2 mmol/L (pericol)</div>
+          <div style="font-size:11px;color:var(--ink4);margin-top:6px">Acum 5 minute</div>
+        </div>
+        <button style="padding:8px 16px;border-radius:var(--r-xs);border:none;background:var(--red);color:#fff;font-size:12px;font-weight:600;cursor:pointer">Vezi</button>
+      </div>
+      <div style="background:var(--surf);border-radius:var(--r-sm);padding:16px 20px;border-left:4px solid var(--yellow);box-shadow:var(--shadow);display:flex;align-items:center;gap:16px">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--yellow);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#b45309;margin-bottom:4px">Consultație în așteptare</div>
+          <div style="font-size:12px;color:var(--ink2)">Pacient Dumitrescu Ana - programată acum 45 minute</div>
+          <div style="font-size:11px;color:var(--ink4);margin-top:6px">Acum 45 minute</div>
+        </div>
+        <button style="padding:8px 16px;border-radius:var(--r-xs);border:1.5px solid var(--border2);background:var(--surf);color:var(--ink2);font-size:12px;font-weight:600;cursor:pointer">Detalii</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS VIEW -->
+  <div class="view" id="view-stats">
+    <div style="background:var(--surf);border-radius:var(--r-sm);padding:20px;margin-bottom:20px;border:1px solid var(--border)">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px">📊 Statistici Secție Cardiologie</div>
+      <div style="height:300px;position:relative">
+        <canvas id="statsChart"></canvas>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val">247</div><div class="stat-lbl">Pacienți lună</div></div>
+      <div class="stat-card"><div class="stat-val">18</div><div class="stat-lbl">Internați azi</div></div>
+      <div class="stat-card"><div class="stat-val">94%</div><div class="stat-lbl">Ocupare paturi</div></div>
+      <div class="stat-card"><div class="stat-val">4.2</div><div class="stat-lbl">Zile medie internare</div></div>
+      <div class="stat-card"><div class="stat-val">38</div><div class="stat-lbl">Consultații azi</div></div>
+      <div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">Externări săptămână</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CALC MODAL -->
+<div class="calc-modal" id="calcModal" onclick="if(event.target===this)closeCalculator()">
+  <div class="calc-box">
+    <div class="calc-box-head">
+      <div class="calc-box-title">🧮 Calculator Medical</div>
+      <button class="close-btn" onclick="closeCalculator()">✕</button>
+    </div>
+    <div class="calc-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="stag on" onclick="showCalc('grace')" id="btn-grace">GRACE</button>
+        <button class="stag off" onclick="showCalc('cha2ds2')" id="btn-cha2ds2">CHA₂DS₂-VASc</button>
+        <button class="stag off" onclick="showCalc('hasbled')" id="btn-hasbled">HAS-BLED</button>
+        <button class="stag off" onclick="showCalc('bmi')" id="btn-bmi">BMI</button>
+      </div>
+      <div id="calcContent">
+        <div class="calc-field">
+          <label>Vârstă (ani)</label>
+          <input type="number" id="calc-age" placeholder="Ex: 67">
+        </div>
+        <div class="calc-field">
+          <label>Frecvență cardiacă (bpm)</label>
+          <input type="number" id="calc-hr" placeholder="Ex: 85">
+        </div>
+        <div class="calc-field">
+          <label>Tensiune sistolică (mmHg)</label>
+          <input type="number" id="calc-sbp" placeholder="Ex: 120">
+        </div>
+        <div class="calc-result">
+          <div class="cr-val" id="calc-result">--</div>
+          <div class="cr-lbl">Scor GRACE</div>
+        </div>
+        <button class="calc-run" onclick="calculateGRACE()">Calculează Scor</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Navigation
+function toggleMobileNav(){
+  const nav=document.getElementById('mainNav');
+  const overlay=document.getElementById('navOverlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+function showView(viewName,navItem){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+viewName).classList.add('active');
+  if(navItem)navItem.classList.add('active');
+  toggleMobileNav();
+}
+
+function toggleAdmin(e){
+  e.stopPropagation();
+  document.getElementById('adminPanel').classList.toggle('open');
+}
+
+let respMode='short';
+function toggleRespMode(){
+  const btn=document.getElementById('respBtn');
+  respMode=respMode==='short'?'elaborat':'short';
+  btn.classList.toggle('elaborat');
+  btn.innerHTML=respMode==='short'?'⚡ Răspuns Scurt':'⚡ Răspuns Elaborat';
+}
+
+function quickAction(action){
+  showView('chat',document.getElementById('nav-chat'));
+  const messages={
+    'STEMI':'Protocol STEMI anterior - ghiduri ESC 2023',
+    'FA':'Anticoagulare în fibrilație atrială',
+    'IC':'Tratament IC cu FE redusă HFrEF',
+    'Calc':'Deschide calculator scoruri risc'
+  };
+  document.getElementById('msgInput').value=messages[action]||'';
+}
+
+function insertMessage(text){
+  document.getElementById('msgInput').value=text;
+  document.getElementById('msgInput').focus();
+}
+
+function sendMessage(){
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  // Here you would normally send to backend
+  console.log('Sending:',text);
+}
+
+// Calculator
+function openCalculator(){
+  document.getElementById('calcModal').classList.add('open');
+}
+
+function closeCalculator(){
+  document.getElementById('calcModal').classList.remove('open');
+}
+
+function showCalc(type){
+  document.querySelectorAll('#calcContent button.stag').forEach(b=>{b.classList.remove('on');b.classList.add('off');});
+  document.getElementById('btn-'+type).classList.remove('off');
+  document.getElementById('btn-'+type).classList.add('on');
+  document.getElementById('calc-result').textContent='--';
+}
+
+function calculateGRACE(){
+  const age=parseInt(document.getElementById('calc-age').value)||0;
+  const hr=parseInt(document.getElementById('calc-hr').value)||0;
+  const sbp=parseInt(document.getElementById('calc-sbp').value)||0;
+  let score=0;
+  if(age>40)score+=Math.min((age-40)*2,50);
+  if(hr>60)score+=Math.min((hr-60),20);
+  if(sbp<120)score+=20;
+  score=Math.min(score,150);
+  document.getElementById('calc-result').textContent=score;
+}
+
+// Charts
+document.addEventListener('DOMContentLoaded',function(){
+  const ctx=document.getElementById('statsChart');
+  if(ctx&&typeof Chart!=='undefined'){
+    new Chart(ctx,{type:'line',data:{labels:['Lun','Mar','Mie','Joi','Vin','Sâm','Dum'],datasets:[{label:'Pacienți internați',data:[12,15,18,14,20,8,5],borderColor:'#2563EB',backgroundColor:'rgba(37,99,235,0.1)',tension:0.4,fill:true},{label:'Consultații',data:[25,32,28,35,30,15,10],borderColor:'#06B6D4',backgroundColor:'rgba(6,182,212,0.1)',tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}});
+  }
+});
+</script>
+</body>
+</html>
