@@ -610,35 +610,74 @@ button,input,textarea,select{font-family:var(--font)}
       <button class="close-btn" onclick="closeCalculator()">✕</button>
     </div>
     <div class="calc-body">
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <div id="calcButtons" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
         <button class="stag on" onclick="showCalc('grace')" id="btn-grace">GRACE</button>
         <button class="stag off" onclick="showCalc('cha2ds2')" id="btn-cha2ds2">CHA₂DS₂-VASc</button>
         <button class="stag off" onclick="showCalc('hasbled')" id="btn-hasbled">HAS-BLED</button>
+        <button class="stag off" onclick="showCalc('timi')" id="btn-timi">TIMI</button>
+        <button class="stag off" onclick="showCalc('egfr')" id="btn-egfr">eGFR</button>
+        <button class="stag off" onclick="showCalc('crcl')" id="btn-crcl">CrCl</button>
         <button class="stag off" onclick="showCalc('bmi')" id="btn-bmi">BMI</button>
       </div>
-      <div id="calcContent">
+      <div id="calcForm">
         <div class="calc-field">
           <label>Vârstă (ani)</label>
-          <input type="number" id="calc-age" placeholder="Ex: 67">
+          <input type="number" id="g_age" placeholder="Ex: 67">
         </div>
         <div class="calc-field">
           <label>Frecvență cardiacă (bpm)</label>
-          <input type="number" id="calc-hr" placeholder="Ex: 85">
+          <input type="number" id="g_hr" placeholder="Ex: 85">
         </div>
         <div class="calc-field">
           <label>Tensiune sistolică (mmHg)</label>
-          <input type="number" id="calc-sbp" placeholder="Ex: 120">
+          <input type="number" id="g_sbp" placeholder="Ex: 120">
         </div>
-        <div class="calc-result">
-          <div class="cr-val" id="calc-result">--</div>
-          <div class="cr-lbl">Scor GRACE</div>
+        <div class="calc-field">
+          <label>Creatinină (mg/dL)</label>
+          <input type="number" id="g_cr" step="0.1" placeholder="Ex: 1.2">
         </div>
-        <button class="calc-run" onclick="calculateGRACE()">Calculează Scor</button>
+        <div class="calc-field">
+          <label>Clasa Killip</label>
+          <select id="g_killip">
+            <option value="0">I - Fără insuficiență cardiacă</option>
+            <option value="1">II - Ronchi, creștere VCI</option>
+            <option value="2">III - Edem pulmonar acut</option>
+            <option value="3">IV - Șoc cardiogen</option>
+          </select>
+        </div>
+        <div class="calc-field">
+          <label>Stop cardiac la prezentare</label>
+          <select id="g_arrest">
+            <option value="0">Nu</option>
+            <option value="1">Da</option>
+          </select>
+        </div>
+        <div class="calc-field">
+          <label>Deviație ST</label>
+          <select id="g_st">
+            <option value="0">Nu</option>
+            <option value="1">Da</option>
+          </select>
+        </div>
+        <div class="calc-field">
+          <label>Troponină crescută</label>
+          <select id="g_trop">
+            <option value="0">Nu</option>
+            <option value="1">Da</option>
+          </select>
+        </div>
+        <div class="calc-result" id="calcResult" style="display:none">
+          <div class="cr-val" id="resultVal">--</div>
+          <div class="cr-lbl" id="resultLbl"></div>
+          <div id="resultAdvice" style="font-size:12px;margin-top:8px;color:var(--ink3)"></div>
+        </div>
+        <button class="calc-run" onclick="runCurrentCalc()">Calculează Scor GRACE</button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="calculators.js"></script>
 <script>
 // Navigation
 function toggleMobileNav(){
@@ -697,30 +736,17 @@ function sendMessage(){
 // Calculator
 function openCalculator(){
   document.getElementById('calcModal').classList.add('open');
+  // Initialize calculator on open
+  if (typeof CALCS !== 'undefined' && !CALCS.current) {
+    showCalc('grace');
+  }
 }
 
 function closeCalculator(){
   document.getElementById('calcModal').classList.remove('open');
 }
 
-function showCalc(type){
-  document.querySelectorAll('#calcContent button.stag').forEach(b=>{b.classList.remove('on');b.classList.add('off');});
-  document.getElementById('btn-'+type).classList.remove('off');
-  document.getElementById('btn-'+type).classList.add('on');
-  document.getElementById('calc-result').textContent='--';
-}
-
-function calculateGRACE(){
-  const age=parseInt(document.getElementById('calc-age').value)||0;
-  const hr=parseInt(document.getElementById('calc-hr').value)||0;
-  const sbp=parseInt(document.getElementById('calc-sbp').value)||0;
-  let score=0;
-  if(age>40)score+=Math.min((age-40)*2,50);
-  if(hr>60)score+=Math.min((hr-60),20);
-  if(sbp<120)score+=20;
-  score=Math.min(score,150);
-  document.getElementById('calc-result').textContent=score;
-}
+// Legacy showCalc overridden by calculators.js
 
 // Charts
 document.addEventListener('DOMContentLoaded',function(){
